@@ -1,0 +1,30 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      docker: 18
+    commands:
+      - echo Logging in to Amazon ECR...
+      - $(aws ecr get-login --no-include-email --region us-east-1)
+      - echo Installing kubectl...
+      - curl -LO "https://amazon-eks.s3.us-west-2.amazonaws.com/1.21.3/2021-07-07/bin/linux/amd64/kubectl"
+      - chmod +x ./kubectl
+      - mv ./kubectl /usr/local/bin/kubectl
+  build:
+    commands:
+      - echo Building the Docker image...
+      - docker build -t nodejs-app .
+      - docker tag nodejs-app:latest <aws_account_id>.dkr.ecr.us-east-1.amazonaws.com/nodejs-app:latest
+      - echo Pushing the Docker image to ECR...
+      - docker push <aws_account_id>.dkr.ecr.us-east-1.amazonaws.com/nodejs-app:latest
+  post_build:
+    commands:
+      - echo Deploying to EKS...
+      - kubectl apply -f k8s/deployment.yaml
+      - kubectl apply -f k8s/service.yaml
+      - kubectl apply -f k8s/ingress.yaml
+
+artifacts:
+  files:
+    - k8s/*
