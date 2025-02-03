@@ -58,3 +58,34 @@ variable "db_password" {
   default     = "ChangeMe123!"
   sensitive   = true
 }
+
+# EKS Cluster Configuration
+variable "eks_cluster_name" {
+  description = "The name of the EKS cluster"
+  type        = string
+  default     = "private-eks-cluster"
+}
+
+variable "eks_worker_instance_type" {
+  description = "EC2 instance type for the EKS worker nodes"
+  type        = string
+  default     = "t3.medium"
+}
+
+variable "eks_desired_node_count" {
+  description = "Desired number of worker nodes in the EKS node group"
+  type        = number
+  default     = 2
+}
+
+variable "eks_min_node_count" {
+  description = "Minimum number of worker nodes in the EKS node group"
+  type        = number
+  default     = 1
+}
+
+variable "eks_max_node_count" {
+  description = "Maximum number of worker nodes in the EKS node group"
+  type        = number
+  default     = 3
+}

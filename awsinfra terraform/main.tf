@@ -43,7 +43,7 @@ resource "aws_subnet" "private_subnet_2" {
   }
 }
 
-# Internet Gateway
+# Internet Gateway (For Public Access)
 resource "aws_internet_gateway" "gw" {
   vpc_id = aws_vpc.eks_vpc.id
 
@@ -114,5 +114,88 @@ resource "aws_db_instance" "mysql" {
 
   tags = {
     Name = "mysql-db"
+  }
+}
+
+# EKS Cluster Role
+resource "aws_iam_role" "eks_cluster_role" {
+  name = "eks-cluster-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action    = "sts:AssumeRole"
+        Principal = {
+          Service = "eks.amazonaws.com"
+        }
+        Effect    = "Allow"
+        Sid       = ""
+      },
+    ]
+  })
+
+  tags = {
+    Name = "eks-cluster-role"
+  }
+}
+
+# EKS Cluster
+resource "aws_eks_cluster" "eks_cluster" {
+  name     = "private-eks-cluster"
+  role_arn = aws_iam_role.eks_cluster_role.arn
+  vpc_config {
+    subnet_ids = [aws_subnet.private_subnet_1.id, aws_subnet.private_subnet_2.id]
+    endpoint_public_access = false
+    endpoint_private_access = true
+  }
+
+  tags = {
+    Name = "private-eks-cluster"
+  }
+}
+
+# EKS Worker Node Role
+resource "aws_iam_role" "eks_worker_role" {
+  name = "eks-worker-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action    = "sts:AssumeRole"
+        Principal = {
+          Service = "ec2.amazonaws.com"
+        }
+        Effect    = "Allow"
+        Sid       = ""
+      },
+    ]
+  })
+
+  tags = {
+    Name = "eks-worker-role"
+  }
+}
+
+# EKS Worker Node Instance Profile
+resource "aws_iam_instance_profile" "eks_worker_instance_profile" {
+  name = "eks-worker-instance-profile"
+  role = aws_iam_role.eks_worker_role.name
+}
+
+# EKS Node Group
+resource "aws_eks_node_group" "eks_node_group" {
+  cluster_name    = aws_eks_cluster.eks_cluster.name
+  node_group_name = "private-node-group"
+  node_role_arn   = aws_iam_role.eks_worker_role.arn
+  subnet_ids      = [aws_subnet.private_subnet_1.id, aws_subnet.private_subnet_2.id]
+  instance_types  = ["t3.medium"]
+  desired_size    = 2
+  min_size        = 1
+  max_size        = 3
+
+  tags = {
+    Name = "private-eks-node-group"
   }
 }
