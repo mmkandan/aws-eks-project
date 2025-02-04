@@ -3,9 +3,6 @@ phases:
   install:
     runtime-versions:
       docker: 20
-    commands:
-      - echo Logging in to Amazon ECR...
-      - aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws/m5l8f7s0
   build:
     commands:
       - echo Building Docker image...
@@ -15,3 +12,4 @@ phases:
     commands:
       - echo Pushing Docker image to Amazon ECR...
       - docker push public.ecr.aws/m5l8f7s0/nodejs-app-repo:latest
+
