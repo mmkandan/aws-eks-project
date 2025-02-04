@@ -5,13 +5,13 @@ phases:
       docker: 20
     commands:
       - echo Logging in to Amazon ECR...
-      - aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 214939106712.dkr.ecr.us-east-1.amazonaws.com
+      - aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws/m5l8f7s0/nodejs-app-repo
   build:
     commands:
       - echo Building Docker image...
       - docker build -t nodejs-app-repo .
-      - docker tag nodejs-app-repo:latest 214939106712.dkr.ecr.us-east-1.amazonaws.com/nodejs-app-repo:latest
+      - docker tag nodejs-app-repo:latest public.ecr.aws/m5l8f7s0/nodejs-app-repo:latest
   post_build:
     commands:
       - echo Pushing Docker image to Amazon ECR...
-      - docker push 214939106712.dkr.ecr.us-east-1.amazonaws.com/nodejs-app-repo:latest
+      - docker push public.ecr.aws/m5l8f7s0/nodejs-app-repo:latest
