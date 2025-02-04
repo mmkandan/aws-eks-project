@@ -9,7 +9,8 @@ phases:
   build:
     commands:
       - echo Building Docker image...
-      - systemctl status docker
+      - sudo systemctl status docker
+      - sudo systemctl start docker
       - docker build -t nodejs-app-repo .
       - docker tag nodejs-app-repo:latest 214939106712.dkr.ecr.us-east-1.amazonaws.com/nodejs-app-repo:latest
   post_build:
